@@ -11,26 +11,29 @@ var Role;
     Role["admin"] = "admin";
     Role["user"] = "user";
 })(Role || (Role = {}));
-let name1 = input("Enter the employee name : ");
-let age1 = Number(input("Enter the employee age : "));
-let role1 = input("Enter the employee role(admin,user) : ");
-let phoneNumber1 = Number(input("Enter the employee PhoneNumber : "));
-let city1 = input("Enter the employee city : ");
-let zipcode1 = Number(input("Enter the employee zipcode : "));
-let finalrole;
-if (role1 == "admin") {
-    finalrole = Role.admin;
-}
-else {
-    finalrole = Role.user;
-}
-const emp1 = {
-    name: name1,
-    age: age1,
-    role: finalrole,
-    phoneNumber: phoneNumber1,
-    city: city1,
-    zipcode: zipcode1
+const createEmployee = () => {
+    let name1 = input("Enter the employee name : ");
+    let age1 = Number(input("Enter the employee age : "));
+    let role1 = input("Enter the employee role(admin,user) : ");
+    let phoneNumber1 = Number(input("Enter the employee PhoneNumber : "));
+    let city1 = input("Enter the employee city : ");
+    let zipcode1 = Number(input("Enter the employee zipcode : "));
+    let finalrole;
+    if (role1 == "admin") {
+        finalrole = Role.admin;
+    }
+    else {
+        finalrole = Role.user;
+    }
+    const emp1 = {
+        name: name1,
+        age: age1,
+        role: finalrole,
+        phoneNumber: phoneNumber1,
+        city: city1,
+        zipcode: zipcode1
+    };
+    return emp1;
 };
 const FILE_PATH = "./data.json";
 const saveEmployee = (emp) => {
@@ -50,7 +53,6 @@ const saveEmployee = (emp) => {
         console.log(error);
     }
 };
-saveEmployee(emp1);
 const getAllEmployees = () => {
     try {
         let employeeDetails = [];
@@ -68,16 +70,57 @@ const getAllEmployees = () => {
     }
     return [];
 };
-let employees = getAllEmployees();
 const displayEmployees = (emp) => {
     // emp.forEach(employee => console.table(employee))
     console.table(emp);
 };
-displayEmployees(employees);
-const deleteEmployeeByName = (nameofEmp) => {
+const deleteEmployeeByName = (nameofEmp, employees) => {
     employees = employees.filter((emp) => emp.name !== nameofEmp);
     fs_1.default.writeFileSync(FILE_PATH, JSON.stringify(employees));
 };
-const empNameToDel = input("Enter the employee name to delete : ");
-deleteEmployeeByName(empNameToDel);
-displayEmployees(employees);
+const updateEmployeeName = (nameOfEmp, newName, employees) => {
+    employees = employees.map((emp) => {
+        if (emp.name === nameOfEmp) {
+            emp.name = newName;
+        }
+        return emp;
+    });
+    fs_1.default.writeFileSync(FILE_PATH, JSON.stringify(employees));
+};
+while (true) {
+    console.log("1. Create Employee");
+    console.log("2. Get All Employees");
+    console.log("3. Delete Employee By Name");
+    console.log("4. Update Employee Name");
+    console.log("5. Exit");
+    let choice = Number(input("Enter your choice : "));
+    let employees = getAllEmployees();
+    switch (choice) {
+        case 1:
+            const employee = createEmployee();
+            saveEmployee(employee);
+            break;
+        case 2:
+            displayEmployees(employees);
+            break;
+        case 3:
+            const empNameToDel = input("Enter the employee name to delete : ");
+            deleteEmployeeByName(empNameToDel, employees);
+            let employeesAfterDel = getAllEmployees();
+            displayEmployees(employeesAfterDel);
+            break;
+        case 4:
+            const empNameToUpdate = input("Enter the employee name to update : ");
+            const newName = input("Enter the new name : ");
+            updateEmployeeName(empNameToUpdate, newName, employees);
+            let employeesAfterUpdate = getAllEmployees();
+            displayEmployees(employeesAfterUpdate);
+            break;
+        case 5:
+            console.log("Exiting the program...");
+            process.exit(0);
+        default:
+            console.log("Invalid choice. Please try again.");
+            break;
+    }
+}

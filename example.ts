@@ -1,6 +1,6 @@
-import  prompt from "prompt-sync"
+import prompt from "prompt-sync";
 const input = prompt();
-import fs from 'fs'
+import fs from "fs";
 
 enum Role {
     admin="admin",
@@ -17,30 +17,37 @@ interface Employee{
     zipcode:number,
 }
 
-let name1:string = input("Enter the employee name : ");
-let age1:number = Number(input("Enter the employee age : "));
-let role1:string = input("Enter the employee role(admin,user) : ")
-let phoneNumber1:number = Number(input("Enter the employee PhoneNumber : "));
-let city1:string = input("Enter the employee city : ");
-let zipcode1:number = Number(input("Enter the employee zipcode : "));
+const createEmployee = ():Employee =>{
+    
+    let name1:string = input("Enter the employee name : ");
+    let age1:number = Number(input("Enter the employee age : "));
+    let role1:string = input("Enter the employee role(admin,user) : ")
+    let phoneNumber1:number = Number(input("Enter the employee PhoneNumber : "));
+    let city1:string = input("Enter the employee city : ");
+    let zipcode1:number = Number(input("Enter the employee zipcode : "));
 
-let finalrole:Role;
+    let finalrole:Role;
 
-if(role1 == "admin"){
-    finalrole = Role.admin;
-}
-else{
-    finalrole = Role.user;
+    if(role1 == "admin"){
+        finalrole = Role.admin;
+    }
+    else{
+        finalrole = Role.user;
+    }
+
+    const emp1:Employee = {
+        name:name1,
+        age:age1,
+        role:finalrole,
+        phoneNumber:phoneNumber1,
+        city:city1,
+        zipcode:zipcode1
+    }
+
+    return emp1;
 }
 
-const emp1:Employee = {
-    name:name1,
-    age:age1,
-    role:finalrole,
-    phoneNumber:phoneNumber1,
-    city:city1,
-    zipcode:zipcode1
-}
+
 
 const FILE_PATH: string = "./data.json"
 
@@ -64,8 +71,6 @@ const saveEmployee = (emp:Employee):void=>{
 
 }
 
-saveEmployee(emp1);
-
 const getAllEmployees = ():Employee[] =>{
     try {
         let employeeDetails:Employee[] = [];
@@ -85,7 +90,6 @@ const getAllEmployees = ():Employee[] =>{
     return [];
 }
 
-let employees:Employee[] = getAllEmployees();
 
 const displayEmployees =(emp: Employee[]) =>{
 
@@ -94,16 +98,67 @@ const displayEmployees =(emp: Employee[]) =>{
    console.table(emp);
 }
 
-displayEmployees(employees);
 
-const deleteEmployeeByName = (nameofEmp : string):void =>{
+
+const deleteEmployeeByName = (nameofEmp : string, employees:Employee[]):void =>{
 
     employees = employees.filter((emp)=>emp.name !== nameofEmp);
 
     fs.writeFileSync(FILE_PATH,JSON.stringify(employees))
 }
 
-const empNameToDel:string = input("Enter the employee name to delete : ");
-deleteEmployeeByName(empNameToDel)
 
-displayEmployees(employees);
+const updateEmployeeName = (nameOfEmp:string, newName:string, employees:Employee[]):void =>{
+    employees = employees.map((emp)=>{
+        if(emp.name === nameOfEmp){
+            emp.name = newName;
+        }
+        return emp;
+    })
+    fs.writeFileSync(FILE_PATH,JSON.stringify(employees))
+}           
+
+
+while(true){
+    console.log("1. Create Employee");
+    console.log("2. Get All Employees");
+    console.log("3. Delete Employee By Name");
+    console.log("4. Update Employee Name");
+    console.log("5. Exit");
+
+    let choice:number = Number(input("Enter your choice : "));
+
+    let employees:Employee[] = getAllEmployees();
+    switch(choice){
+
+        
+        case 1:
+            const employee:Employee = createEmployee();
+            saveEmployee(employee);
+            break;
+        case 2:
+           
+            displayEmployees(employees);
+            break;
+        case 3:
+            const empNameToDel:string = input("Enter the employee name to delete : ");
+            deleteEmployeeByName(empNameToDel,employees);
+            let employeesAfterDel:Employee[] = getAllEmployees();
+            displayEmployees(employeesAfterDel);    
+            break;
+
+        case 4: 
+            const empNameToUpdate:string = input("Enter the employee name to update : ");
+            const newName:string = input("Enter the new name : ");
+            updateEmployeeName(empNameToUpdate,newName,employees);
+            let employeesAfterUpdate:Employee[] = getAllEmployees();
+            displayEmployees(employeesAfterUpdate);    
+            break;
+        case 5:
+            console.log("Exiting the program...");  
+            process.exit(0);
+        default:
+            console.log("Invalid choice. Please try again.");
+            break;      
+}
+}
